@@ -2,7 +2,7 @@ import praw
 import requests
 import os
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # Reddit API credentials
 reddit = praw.Reddit(
@@ -35,7 +35,9 @@ def save_last_timestamp(timestamp):
 
 def check_posts():
     subreddit = reddit.subreddit(subreddit_name)
-    last_checked_timestamp = load_last_timestamp()
+    two_weeks_ago = datetime.utcnow() - timedelta(weeks=2)
+    two_weeks_ago_timestamp = two_weeks_ago.timestamp()
+    last_checked_timestamp = max(load_last_timestamp(), two_weeks_ago_timestamp)
     new_last_checked_timestamp = last_checked_timestamp
 
     for post in subreddit.new(limit=100):  # Check the latest 100 posts
@@ -58,4 +60,3 @@ def send_discord_notification(message):
 
 if __name__ == "__main__":
     check_posts()
-
