@@ -17,6 +17,7 @@ discord_webhook_url = os.getenv('DISCORD_WEBHOOK_URL')
 # Subreddit and key phrase
 subreddit_name = 'watchexchange'
 key_phrase = 'Hamilton'
+excluded_flair = 'Sold'
 
 # File to store the timestamp of the last checked post
 timestamp_file = 'last_checked_timestamp.json'
@@ -42,6 +43,8 @@ def check_posts():
     for post in subreddit.new(limit=500):  # Check the latest 500 posts
         post_timestamp = post.created_utc
         if post_timestamp > last_checked_timestamp:
+            if post.link_flair_text and post.link_flair_text == excluded_flair:
+                continue
             if key_phrase in post.title:
                 message = f"New post found: **{post.link_flair_text}** | [{post.title}]({post.url})"
                 send_discord_notification(message)
