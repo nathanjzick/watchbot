@@ -35,12 +35,17 @@ def save_last_timestamp(timestamp):
 
 def check_posts():
     subreddit = reddit.subreddit(subreddit_name)
-    two_weeks_ago = datetime.utcnow() - timedelta(weeks=2)
-    two_weeks_ago_timestamp = two_weeks_ago.timestamp()
-    last_checked_timestamp = max(load_last_timestamp(), two_weeks_ago_timestamp)
+    last_checked_timestamp = load_last_timestamp()
+
+    if last_checked_timestamp == 0:
+        # First run: get posts from the last 2 weeks
+        two_weeks_ago = datetime.utcnow() - timedelta(weeks=2)
+        two_weeks_ago_timestamp = two_weeks_ago.timestamp()
+        last_checked_timestamp = two_weeks_ago_timestamp
+
     new_last_checked_timestamp = last_checked_timestamp
 
-    for post in subreddit.new(limit=500):  # Check the latest 500 posts
+    for post in subreddit.new(limit=100):  # Check the latest 100 posts
         post_timestamp = post.created_utc
         if post_timestamp > last_checked_timestamp:
             if post.link_flair_text and post.link_flair_text == excluded_flair:
