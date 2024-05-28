@@ -28,6 +28,7 @@ def load_config():
             return json.load(file)
     return {"target_phrases": ["Hamilton", "Seiko"], "last_checked_timestamp": 0}
 
+# Save configuration to file
 def save_config(config):
     with open(config_file, 'w') as file:
         json.dump(config, file)
@@ -44,19 +45,22 @@ def check_posts():
     last_checked_timestamp = max(last_checked_timestamp, two_weeks_ago_timestamp)
     new_last_checked_timestamp = last_checked_timestamp
 
-    for post in subreddit.new(limit=100):  # Check the latest 100 posts
+    # Get all posts since the last check
+    for post in subreddit.new(limit=None):  
         post_timestamp = post.created_utc
         if post_timestamp > last_checked_timestamp:
-            if post.link_flair_text and post.link_flair_text == excluded_flair:
+            if post.link_flair_text == excluded_flair:
                 continue
             if any(phrase in post.title for phrase in target_phrases):
                 message = f"New post found: **{post.link_flair_text}** | [{post.title}]({post.url})"
                 send_discord_notification(message)
             new_last_checked_timestamp = max(new_last_checked_timestamp, post_timestamp)
 
-    last_checked_timestamp = new_last_checked_timestamp
-    config['last_checked_timestamp'] = last_checked_timestamp
-    save_config(config)
+    # Update the last checked timestamp only if it has changed
+    if new_last_checked_timestamp != last_checked_timestamp:
+        last_checked_timestamp = new_last_checked_timestamp
+        config['last_checked_timestamp'] = last_checked_timestamp
+        save_config(config)
 
 def send_discord_notification(message):
     data = {"content": message}
