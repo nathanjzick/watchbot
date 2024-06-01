@@ -26,7 +26,7 @@ def load_config():
     if os.path.exists(config_file):
         with open(config_file, 'r') as file:
             return json.load(file)
-    return {"target_phrases": ["Hamilton", "Seiko"], "last_checked_timestamp": 0}
+    return {"target_phrases": ["Murph", "Khaki Field", "Field Auto", "SRPJ13", "SRPK15", "SRPB41"], "last_checked_timestamp": 0}
 
 # Save configuration to file
 def save_config(config):
